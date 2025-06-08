@@ -1,5 +1,7 @@
+<!-- eslint-disable vue/no-multiple-template-root -->
 <template>
-  <div class="border-b border-gray-900/10 pb-12">
+  <Nav-bar />
+  <div class="flex flex-col mx-20 my-20 h-full border-2 border-gray-300 rounded-lg px-50 py-16 shadow-lg bg-white ">
     <h2 class="text-base/7 font-semibold text-gray-900">Personal Information</h2>
     <p class="mt-1 text-sm/6 text-gray-600">Use a permanent address where you can receive mail.</p>
 
@@ -174,42 +176,17 @@
             </div>
           </div>
         </fieldset>
+        <div class="mt-6 flex items-center justify-end gap-x-6">
+          <button type="button" class="text-sm/6 font-semibold text-gray-900">Cancel</button>
+          <button type="submit"
+            class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Save</button>
+        </div>
       </div>
     </div>
 
-    <div class="mt-6 flex items-center justify-end gap-x-6">
-      <button type="button" class="text-sm/6 font-semibold text-gray-900">Cancel</button>
-      <button type="submit"
-        class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Save</button>
-    </div>
+
   </div>
 
 </template>
 
 
-
-<!-- <template>
-
-  <div class="form-section">
-
-    <h2>Personal Information</h2>
-
-<input id="full-name" type="text" placeholder="Full Name" required>
-
-<input id="victim-address" type="text" placeholder="Address of Victim" required>
-
-<input id="victim-contact" type="tel" placeholder="Contact of Victim" required>
-
-<input id="witness-name" type="text" placeholder="Witness Name" required>
-
-<input id="witness-contact" type="tel" placeholder="Contact of Witness" required>
-
-<button>Proceed</button>
-  </div>
-
-
-
-   
-
-
-</template> -->

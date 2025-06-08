@@ -1,47 +1,54 @@
 <!-- <title>Crime Interference Form</title> -->
-
+<!-- eslint-disable vue/no-multiple-template-root -->
+<!-- eslint-disable vue/attributes-order -->
 <template>
-  <div class="form-container">
-    <h2>Crime Interference Report</h2>
-    <label for="crime-date">
-      Date of Crime
-      <input type="date" placeholder="DD/MM/YYYY">
-    </label>
+  <Nav-bar />
+  <div class="flex flex-col mx-20 my-20 h-200 border-2 border-gray-300 rounded-lg px-50 py-16 shadow-lg bg-white ">
+    <h2 class="text-center text-2xl text-blue-700">Crime Interference Report</h2>
+ 
+      <label for="police-station" class="text-lg font-bold text-gray-700">
+        Select Police Station
+        <select class="block w-full mt-2 p-2 border border-gray-300 rounded" id="police-station">
+          <option value="" disabled selected>Select a police station</option>
+          <option>Select nearby police station</option>
+          <option>Kyaggwe Police Station</option>
+          <option>Mukono Police Station</option>
+          <option>Seeta Police Station</option>
+        </select>
+      </label>
 
-    <label for="crime-time">
-      Time of Crime
-      <input type="time">
-    </label>
+      <label for="crime-location" class="text-lg font-bold text-gray-700 mt-4">
+        Detect Location
+      </label>
+      <input type="text" placeholder="Tap to get my location" readonly
+        class="block w-full mt-2 p-2 border border-gray-300 rounded" id="crime-location">
 
-    <label for="crime-location">
-      Location of Crime
-      <select id="crime-location">
-        <option>Select Location</option>
-        <option>City Centre</option>
-        <option>Town</option>
-      </select>
-    </label>
+      <button class="mt-2 bg-blue-500 text-white px-4 py-2 rounded" id="get-location">
+        <small>Click the button to get your location</small>
+      </button>
 
-    <!-- <label for="crime-description">
-    Description of Crime
-    <textarea
-      id="crime-description"
-      rows="4"
-      placeholder="Describe">
-    </textarea>
-  </label>
- -->
-    <label for="injury-type">
-      Any Injuries
-      <select id="injury-type">
-        <option>Select type of injury</option>
-        <option>None</option>
-        <option>Severe</option>
-        <option>Minor</option>
-      </select>
-    </label>
+      <div class="mt-4">
+        <label class="text-lg text-3xl text-gray-700" for="crime-type">
+          Select File Type
+        </label>
+        <select class="block w-full mt-2 p-2 border border-gray-300 rounded" id="crime-type">
+          <option value="" disabled selected>Select a file type</option>
+          <option value="documents/pdf">Documents (PDF)</option>
+          <option value="images/jpeg">Images (JPEG)</option>
+          <option value="videos/mp4">Videos (MP4)</option>
+          <option value="other">Other</option>
+        </select>
 
-    <button>Proceed</button>
+        <label for="evidence-upload">
+          Attach Evidence
+        </label>
+        <input type="file" multiple class="block w-full mt-2 p-2 border border-gray-300 rounded" id="evidence-upload"
+          accept=".pdf, .jpg, .jpeg, .mp4">
+        <small>Acceptable formats: videos, images, or documents</small>
+      </div>
+
+      <button type="submit" class="mt-2 bg-blue-500 text-white px-4 py-2 rounded">Submit</button>
+    
   </div>
 </template>
 <style lang="css" scoped></style>
