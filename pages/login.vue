@@ -1,144 +1,86 @@
 <template>
-
-
-  <div class="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
-    <div class="sm:mx-auto sm:w-full sm:max-w-sm">
-      <!-- <img class="mx-auto h-10 w-auto" /> -->
-      <h2 class="mt-10 text-center text-2xl/9 font-bold tracking-tight text-gray-900">Sign in to your account</h2>
-    </div>
-
-    <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-      <!-- login Form -->
-      <form class="space-y-6" @submit.prevent="handleLogin"> 
-        <div>
-          <label for="email" class="block text-sm/6 font-medium text-gray-900">Email address</label>
-          <div class="mt-2">
-            <input type="email" placeholder="kabukusi@mail.com" autocomplete="email" required
-              class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
-          </div>
-        </div>
-
-        <div>
-          <div class="flex items-center justify-between">
-            <label for="password" class="block text-sm/6 font-medium text-gray-900"  >Password</label>
-            <div class="text-sm">
-              <a href="#" class="font-semibold text-indigo-600 hover:text-indigo-500">Forgot password?</a>
+    <div class="flex flex-col mx-auto my-20 max-w-md border-2 border-gray-300 rounded-lg px-8 py-16 shadow-lg bg-white">
+        <h2 class="text-2xl font-semibold text-gray-900 text-center mb-8">Login to Loopa-App</h2>
+        
+        <form @submit.prevent="handleLogin">
+            <div v-if="error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                {{ error }}
             </div>
-          </div>
-          <div class="mt-2">
-            <input type="password" placeholder="***************" autocomplete="current-password" required v-model="password"
-              class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
-          </div>
-        </div>
-
-        <div>
-          <button
-            class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Sign
-            in</button>
-        </div>
-      </form>
-
-      <p class="mt-10 text-center text-sm/6 text-gray-500">
-        Not a member?
-        {{ ' ' }}
-        <nuxt-link to="/Sign-up" class="font-semibold text-indigo-600 hover:text-indigo-500">Sign up to get an
-          Account</nuxt-link>
-      </p>
+            
+            <div class="mb-4">
+                <label for="email" class="block text-sm font-medium text-gray-900 mb-2">Email address</label>
+                <input
+                    id="email"
+                    v-model="loginData.email"
+                    type="email"
+                    required 
+                    class="block w-full rounded-md bg-white px-3 py-2 text-gray-900 border border-gray-300 focus:border-indigo-600 focus:outline-none"
+                >
+            </div>
+            
+            <div class="mb-6">
+                <label for="password" class="block text-sm font-medium text-gray-900 mb-2">Password</label>
+                <input
+                    id="password"
+                    v-model="loginData.password"
+                    type="password"
+                    required 
+                    class="block w-full rounded-md bg-white px-3 py-2 text-gray-900 border border-gray-300 focus:border-indigo-600 focus:outline-none"
+                >
+            </div>
+            
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center">
+                    <input
+                        id="remember-me"
+                        type="checkbox"
+                        class="h-4 w-4 text-indigo-600 border-gray-300 rounded"
+                    >
+                    <label for="remember-me" class="ml-2 block text-sm text-gray-900">Remember me</label>
+                </div>
+                
+                <div class="text-sm">
+                    <a href="#" class="font-medium text-indigo-600 hover:text-indigo-500">Forgot your password?</a>
+                </div>
+            </div>
+            
+            <button
+                class="w-full rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus:outline-none"
+                type="submit"
+                :disabled="loading"
+            >
+                {{ loading ? 'Logging in...' : 'Login' }}
+            </button>
+            
+            <div class="mt-4 text-center">
+                <p class="text-sm text-gray-600">
+                    Don't have an account?
+                    <NuxtLink to="/Sign-up" class="font-medium text-indigo-600 hover:text-indigo-500">Sign up</NuxtLink>
+                </p>
+            </div>
+        </form>
     </div>
-  </div>
 </template>
 
-
-
 <script setup>
-const supabase = useSupabaseClient()
-const loading = ref(false)
-const email = ref('')
-const password=ref('')
+import { useAuth } from '~/composables/useAuth'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+const { loginData, login, loading, error } = useAuth()
 
 const handleLogin = async () => {
   try {
-    loading.value = true
-    const { error } = await supabase.auth.signInWithOtp({ email: email.value })
-    if (error) throw error
-    alert('Check your email for the login link!')
-  } catch (error) {
-    alert(error.error_description || error.message)
-  } finally {
-    loading.value = false
+    const result = await login()
+    
+    // Redirect based on user role
+    if (result.user.role === 'Super Admin' || result.user.isAdmin) {
+      router.push('/admin/dashboard')
+    } else {
+      router.push('/records')
+    }
+  } catch {
+    // Error is already handled in the composable
   }
-
 }
 </script>
-
-
-
-<!-- 
-<template>
-  <div>
-    <main class="signin-container">
-      <section class="signin-form">
-        <h1>Sign In</h1>
-        <form @submit.prevent="handleLogin">
-          <input type="email" placeholder="email" v-model="email" required>
-          <input type="password" placeholder="Password" required>
-        </form>
-        <button type="submit">Log In</button>
-        <p class="signup-link">Don't have an account?
-          <nuxt-link to="/Sign-up">Sign up</nuxt-link>
-
-        </p>
-      </section>
-    </main>
-
-  </div>
-</template>
-<style lang="css" scoped>
-* {
-  font-family: -apple-system;
-  font-size: large;
-}
-
-.signin-container {
-  border: 1px solid navy;
-  display: block;
-  height: 500px;
-  margin: 30px 40px;
-  background-color: aliceblue;
-  border-radius: 5px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.signin-form {
-  display: flex;
-  margin: 20px;
-  padding: 30px;
-  flex-direction: column;
-  justify-items: center;
-  align-items: center;
-}
-
-input {
-  display: flex;
-  flex-direction: column;
-  height: 30px;
-  width: 300px;
-  border: none;
-  border-radius: 5px;
-  margin: 30px;
-}
-
-button {
-  width: 150px;
-  height: 40px;
-  border: none;
-  border-radius: 5px;
-
-}
-
-button:hover {
-  background-image: linear-gradient(90deg, cyan, navy);
-  color: azure;
-  transition: ease-in;
-}
-</style> -->

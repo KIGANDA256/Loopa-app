@@ -7,10 +7,10 @@
         <h2 class="text-center text-2xl text-blue-700">Loopa-App</h2>
         <p>Here you can find all the records related to your case.</p>
         <ul>
-            <quote class="flex flex-col space-y-4">
+            <li class="flex flex-col space-y-4">
                 <h2>Record 1</h2>
                 <p>Details about record 1.</p>
-            </quote>
+            </li>
         </ul>
         <div>
             <table class="border-1 border-neutral-300">
