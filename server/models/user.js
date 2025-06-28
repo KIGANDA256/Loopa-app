@@ -1,5 +1,5 @@
 import mongoose from 'mongoose'
-import bcrypt from 'bcryptjs'
+import bcrypt from 'bcrypt'
 
 const userSchema = new mongoose.Schema({
   firstName: String,
@@ -18,7 +18,7 @@ const userSchema = new mongoose.Schema({
   citizenship: String,
   role: {
     type: String,
-    enum: ['Super Admin', 'Security Personnel', 'Civilian'],
+    enum: ['Super Admin', 'Admin', 'User', 'Civilian'],
     default: 'Civilian'
   },
   // Admin-specific fields
@@ -51,9 +51,9 @@ const userSchema = new mongoose.Schema({
     default: Date.now
   },
   lastLogin: Date
-})
+}, { timestamps: true })
 
-// Hash password before saving
+// Pre-save hook to hash password and set admin flags
 userSchema.pre('save', async function(next) {
   // Set admin flags based on role
   if (this.role === 'Super Admin') {
@@ -91,8 +91,12 @@ userSchema.pre('save', async function(next) {
 })
 
 // Method to check password
-userSchema.methods.comparePassword = async function(password) {
-  return await bcrypt.compare(password, this.password)
+userSchema.methods.comparePassword = async function(candidatePassword) {
+  try {
+    return await bcrypt.compare(candidatePassword, this.password)
+  } catch (error) {
+    throw error
+  }
 }
 
 // Helper methods for role checking

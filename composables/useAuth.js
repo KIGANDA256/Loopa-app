@@ -1,118 +1,161 @@
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, readonly, onMounted, computed } from 'vue'
 
 export const useAuth = () => {
-  const user = ref(null)
-  const loading = ref(false)
-  const error = ref(null)
+  const user = useState('user', () => null)
+  const token = useCookie('auth_token', { sameSite: 'lax' }) // or 'strict' if you want
+  const error = useState('auth-error', () => null)
+  const loading = useState('auth-loading', () => false)
   
-  const registerData = reactive({
-    firstName: '',
-    lastName: '',
-    email: '',
-    password: '',
-    citizenship: '',
-    role: 'Civilian',
-    nationalId: '',
-    staffId: '',
-    city: '',
-    district: '',
-    contact: ''
-  })
+  const isAuthenticated = computed(() => !!token.value)
+  const isAdmin = computed(() => user.value?.role === 'Admin' || user.value?.role === 'Super Admin')
+  const isNormalUser = computed(() => user.value && !isAdmin.value)
   
-  const loginData = reactive({
-    email: '',
-    password: ''
-  })
-
-  const register = async () => {
-    loading.value = true
+  function clearError() {
     error.value = null
-    
-    try {
-      const response = await $fetch('/api/auth/register', {
-        method: 'POST',
-        body: registerData
-      })
-      
-      return response
-    } catch (err) {
-      error.value = err.data?.message || 'Registration failed'
-      throw error.value
-    } finally {
-      loading.value = false
-    }
   }
   
-  const login = async () => {
+  // Create a function to get auth headers for API requests
+  const getAuthHeaders = () => {
+    return token.value ? { Authorization: `Bearer ${token.value}` } : {}
+  }
+  
+  // Real login function that calls the backend
+  const login = async (email, password) => {
+    // Clear error at the start of login
+    clearError()
     loading.value = true
-    error.value = null
     
     try {
+      // Make a real API call to your backend
       const response = await $fetch('/api/auth/login', {
         method: 'POST',
-        body: loginData
+        body: { email, password }
       })
       
-      // Store token and user data
-      localStorage.setItem('auth_token', response.token)
+      // Make sure token is properly stored
+      token.value = response.token
+      console.log('Token stored:', token.value) // Debug line
       user.value = response.user
       
       return response
     } catch (err) {
+      // Set error message
       error.value = err.data?.message || 'Login failed'
-      throw error.value
+      throw err
     } finally {
       loading.value = false
     }
   }
   
-  const logout = () => {
-    localStorage.removeItem('auth_token')
-    user.value = null
-  }
-  
+  // Fetch the current user data - updated to handle no token case silently
   const fetchUser = async () => {
-    const token = localStorage.getItem('auth_token')
-    if (!token) return null
-    
-    loading.value = true
-    error.value = null
+    // If no token exists, silently return without error
+    if (!token.value) {
+      return null
+    }
     
     try {
-      const response = await $fetch('/api/auth/me', {
+      const userData = await $fetch('/api/auth/me', {
         headers: {
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${token.value}`
         }
       })
       
-      user.value = response
-      return response
+      user.value = userData
+      return userData
     } catch (err) {
-      error.value = err.data?.message || 'Failed to fetch user'
-      logout()
-      throw error.value
+      // Only log detailed errors in development
+      if (process.env.NODE_ENV !== 'production') {
+        console.error('Error fetching user:', err)
+      }
+      
+      // Only logout on actual token validation failures, not on first-time visits
+      if (err.response?.status === 401 && token.value) {
+        // Clear the invalid token
+        token.value = null
+        user.value = null
+      }
+      return null
+    }
+  }
+  
+  // Logout function
+  const logout = () => {
+    console.log('Logout called')
+    
+    // Clear token in cookie
+    token.value = null
+    user.value = null
+    
+    // Call the backend logout endpoint for any server-side cleanup
+    try {
+      $fetch('/api/auth/logout', {
+        method: 'POST',
+        headers: getAuthHeaders()
+      })
+    } catch (error) {
+      console.error('Error during logout:', error)
+    }
+
+    // Force clear any stored auth data
+    if (process.client) {
+      // Clear any localStorage items if you're using them
+      localStorage.removeItem('auth_user')
+      
+      // Hard redirect to login page to ensure clean state
+      window.location.href = '/login'
+    } else {
+      // Server-side, just navigate
+      navigateTo('/login')
+    }
+  }
+  
+  // Create a custom fetch function that automatically adds auth headers
+  const authFetch = async (url, options = {}) => {
+    return await $fetch(url, {
+      ...options,
+      headers: {
+        ...options.headers,
+        Authorization: `Bearer ${token.value}` // token from useCookie('auth_token')
+      }
+    })
+  }
+  
+  // Registration function
+  const register = async (userData) => {
+    clearError()
+    loading.value = true
+    try {
+      await $fetch('/api/auth/register', {
+        method: 'POST',
+        body: userData
+      })
+    } catch (err) {
+      error.value = err.data?.message || err.message || 'Registration failed'
+      throw err
     } finally {
       loading.value = false
     }
   }
-  
-  const isAuthenticated = computed(() => !!user.value)
-  
-  // Try to restore session on init
-  onMounted(() => {
-    fetchUser().catch(() => {})
-  })
+
+  // Initialize auth on client side
+  if (process.client) {
+    onMounted(fetchUser)
+  }
   
   return {
     user,
-    loading,
-    error,
-    registerData,
-    loginData,
-    register,
     login,
     logout,
     fetchUser,
-    isAuthenticated
+    loading,
+    error,
+    clearError,
+    isAuthenticated,
+    isAdmin,
+    isNormalUser,
+    authFetch, // Export the authenticated fetch function
+    getAuthHeaders, // Export for manual use when needed
+    register // Export the registration function
   }
 }

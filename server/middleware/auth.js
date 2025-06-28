@@ -1,11 +1,11 @@
-import { getHeaders, createError } from 'h3'
+import { getHeaders, createError, getRequestHeader, getCookie } from 'h3'
 import jwt from 'jsonwebtoken'
-import connectDB from '../utils/db'
+import { connectToDatabase } from '../utils/db'
 import User from '../models/user'
 
 export const verifyToken = async (event) => {
   try {
-    await connectDB()
+    await connectToDatabase()
     
     const headers = getHeaders(event)
     const authHeader = headers.authorization
@@ -85,8 +85,33 @@ export const checkPermission = (permission) => async (event) => {
   return user
 }
 
+export const requireRole = (role) => async (event) => {
+  const user = await verifyToken(event)
+  if (user.role !== role) {
+    throw createError({
+      statusCode: 403,
+      message: `${role} access required`
+    })
+  }
+  return user
+}
+
 // Add a default export for the middleware
 export default defineEventHandler(async (event) => {
-  // This is a pass-through middleware
-  // It doesn't do anything by default, but the named exports can be used directly
+  // Try cookie first
+  let token = getCookie(event, 'token')
+  // Fallback to Authorization header
+  if (!token) {
+    const authHeader = getRequestHeader(event, 'authorization')
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      token = authHeader.substring(7)
+    }
+  }
+  if (!token) return
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET)
+    event.context.auth = decoded
+  } catch (err) {
+    throw createError({ statusCode: 401, message: 'Invalid token' })
+  }
 })

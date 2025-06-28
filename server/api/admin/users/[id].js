@@ -1,12 +1,12 @@
 import { defineEventHandler, getRouterParam, readBody, createError } from 'h3'
-import connectDB from '../../../utils/db'
+import { connectToDatabase } from '../../../utils/db'
 import User from '../../../models/user'
 import { requireSuperAdmin, checkPermission } from '../../../middleware/auth'
 
 export default defineEventHandler(async (event) => {
   try {
     // Connect to database
-    await connectDB()
+    await connectToDatabase()
     
     const id = getRouterParam(event, 'id')
     

@@ -1,23 +1,23 @@
 import mongoose from 'mongoose'
+import { useRuntimeConfig } from '#imports'
 
-// MongoDB connection string for Docker setup
-const MONGODB_URI = 'mongodb://loopa_admin:secure_password@localhost:27017/loopa_db?authSource=admin'
+let connection = null
 
-const connectDB = async () => {
+export async function connectToDatabase() {
+  if (connection) return connection
+  
+  const config = useRuntimeConfig()
+  
   try {
-    if (mongoose.connection.readyState === 1) {
-      return; // Already connected
-    }
+    connection = await mongoose.connect(config.mongodbUri)
     
-    await mongoose.connect(process.env.MONGODB_URI || MONGODB_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    })
-    console.log('MongoDB connected successfully')
+    console.log('Connected to MongoDB')
+    return connection
   } catch (error) {
     console.error('MongoDB connection error:', error)
-    process.exit(1)
+    throw error
   }
 }
 
-export default connectDB
+// Auto-connect when the server starts
+connectToDatabase().catch(console.error)

@@ -1,11 +1,11 @@
 import { defineEventHandler, readBody, createError } from 'h3'
-import connectDB from '../../utils/db'
+import{connectToDatabase} from '../../utils/db'
 import User from '../../models/user'
 
 export default defineEventHandler(async (event) => {
   try {
     // Connect to database
-    await connectDB()
+    await connectToDatabase()
     
     const body = await readBody(event)
     
@@ -31,9 +31,9 @@ export default defineEventHandler(async (event) => {
       firstName: body.firstName || '',
       lastName: body.lastName || '',
       email: body.email,
-      password: body.password, // Will be hashed by pre-save hook
+      password: body.password,
       citizenship: body.citizenship || '',
-      role: body.role || 'Civilian',
+      role: 'User', // <-- Always 'User'
       nationalId: body.nationalId || '',
       staffId: body.staffId || '',
       city: body.city || '',
@@ -49,10 +49,10 @@ export default defineEventHandler(async (event) => {
     
     return userObj
   } catch (error) {
-    console.error('Registration error:', error)
-    throw createError({
-      statusCode: error.statusCode || 500,
-      message: error.message || 'Error creating user'
+    console.error('Registration error details:', error);
+    return createError({
+      statusCode: 500,
+      message: error.message || 'Failed to register user'
     })
   }
 })

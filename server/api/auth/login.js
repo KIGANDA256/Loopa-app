@@ -1,66 +1,71 @@
-import { defineEventHandler, readBody, createError } from 'h3'
+import { defineEventHandler, readBody, createError, setCookie } from 'h3'
 import jwt from 'jsonwebtoken'
-import connectDB from '../../utils/db'
+import { connectToDatabase } from '../../utils/db' 
 import User from '../../models/user'
 
 export default defineEventHandler(async (event) => {
   try {
-    // Connect to database
-    await connectDB()
-    
+    await connectToDatabase()
     const body = await readBody(event)
     const config = useRuntimeConfig()
-    
-    // Validate required fields
+
     if (!body.email || !body.password) {
       throw createError({
         statusCode: 400,
         message: 'Email and password are required'
       })
     }
-    
-    // Find user
+
+    // Find user by email
     const user = await User.findOne({ email: body.email })
     if (!user) {
       throw createError({
         statusCode: 401,
-        message: 'Invalid credentials'
+        message: 'Invalid email or password'
       })
     }
-    
-    // Verify password
+
+    // Use the model's comparePassword method
     const isMatch = await user.comparePassword(body.password)
     if (!isMatch) {
       throw createError({
         statusCode: 401,
-        message: 'Invalid credentials'
+        message: 'Invalid email or password'
       })
     }
-    
-    // Update last login time
-    user.lastLogin = new Date()
-    await user.save()
-    
+
     // Generate JWT token
-    const token = jwt.sign(
-      { userId: user._id, email: user.email, role: user.role },
-      config.jwtSecret || 'fallback_secret',
+    const jwtToken = jwt.sign(
+      {
+        userId: user._id,
+        email: user.email,
+        role: user.role,
+        name: user.firstName + ' ' + user.lastName
+      },
+      config.jwtSecret,
       { expiresIn: '24h' }
     )
-    
-    // Return user without password and token
-    const userObj = user.toObject()
-    delete userObj.password
-    
+
+    setCookie(event, 'token', jwtToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 60 * 60 * 24 * 7 // 1 week
+    })
+
+    // Remove password from user object before sending
+    const { password, ...userWithoutPassword } = user.toObject()
+
     return {
-      user: userObj,
-      token
+      token: jwtToken,
+      user: userWithoutPassword
     }
   } catch (error) {
     console.error('Login error:', error)
     throw createError({
       statusCode: error.statusCode || 500,
-      message: error.message || 'Error logging in'
+      message: error.message || 'Authentication failed'
     })
   }
 })

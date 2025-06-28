@@ -1,282 +1,442 @@
 <template>
-    <div class="flex justify-center items-center min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-        <div class="max-w-3xl w-full space-y-8 bg-white p-10 rounded-xl shadow-lg">
-            <div class="text-center">
-                <h2 class="mt-6 text-3xl font-extrabold text-gray-900">Create your account</h2>
-                <p class="mt-2 text-sm text-gray-600">Please fill in your information to get started</p>
-            </div>
-            
-            <!-- Error Alert -->
-            <div v-if="error" class="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
-                <div class="flex">
-                    <div class="flex-shrink-0">
-                        <svg class="h-5 w-5 text-red-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                        </svg>
-                    </div>
-                    <div class="ml-3">
-                        <p class="text-sm text-red-700">{{ error }}</p>
-                    </div>
-                </div>
-            </div>
-            
-            <form class="mt-8 space-y-6" @submit.prevent="handleSignup">
-                <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
-                    <!-- First Name & Last Name -->
-                    <div class="sm:col-span-3">
-                        <label for="first-name" class="block text-sm font-medium text-gray-700">First name</label>
-                        <div class="mt-1">
-                            <input
-                                id="first-name"
-                                v-model="userData.firstName"
-                                type="text"
-                                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                                required
-                            >
-                        </div>
-                    </div>
-
-                    <div class="sm:col-span-3">
-                        <label for="last-name" class="block text-sm font-medium text-gray-700">Last name</label>
-                        <div class="mt-1">
-                            <input
-                                id="last-name"
-                                v-model="userData.lastName"
-                                type="text"
-                                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                                required
-                            >
-                        </div>
-                    </div>
-
-                    <!-- Email & Password -->
-                    <div class="sm:col-span-6">
-                        <label for="email" class="block text-sm font-medium text-gray-700">Email address</label>
-                        <div class="mt-1">
-                            <input
-                                id="email"
-                                v-model="userData.email"
-                                type="email"
-                                autocomplete="email"
-                                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                                required
-                            >
-                        </div>
-                    </div>
-
-                    <div class="sm:col-span-6">
-                        <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
-                        <div class="mt-1">
-                            <input
-                                id="password"
-                                v-model="userData.password"
-                                type="password"
-                                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                                required
-                            >
-                        </div>
-                    </div>
-
-                    <!-- Citizenship & Role -->
-                    <div class="sm:col-span-3">
-                        <label for="citizenship" class="block text-sm font-medium text-gray-700">
-                            <span class="text-red-500">*</span> Citizenship
-                        </label>
-                        <div class="mt-1 relative">
-                            <select
-                                id="citizenship"
-                                v-model="userData.citizenship"
-                                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                                required
-                            >
-                                <option>Ugandan Citizen</option>
-                                <option>Not a Ugandan citizen</option>
-                            </select>
-                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 011.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                                </svg>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="sm:col-span-3">
-                        <label for="role" class="block text-sm font-medium text-gray-700">
-                            <span class="text-red-500">*</span> Role
-                        </label>
-                        <div class="mt-1 relative">
-                            <select
-                                id="role"
-                                v-model="userData.role"
-                                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                                required
-                            >
-                                <option>Security Personnel</option>
-                                <option>Civilian</option>
-                            </select>
-                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 011.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                                </svg>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- National ID & Staff ID -->
-                    <div class="sm:col-span-6">
-                        <label for="nationalId" class="block text-sm font-medium text-gray-700">
-                            <span class="text-red-500">*</span> National ID number
-                        </label>
-                        <div class="mt-1">
-                            <input
-                                id="nationalId"
-                                v-model="userData.nationalId"
-                                type="text"
-                                placeholder="CM90388321NZGA"
-                                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                                required
-                            >
-                        </div>
-                    </div>
-
-                    <!-- Only show Staff ID for Security Personnel -->
-                    <div v-if="userData.role === 'Security Personnel'" class="sm:col-span-6">
-                        <label for="staffId" class="block text-sm font-medium text-gray-700">
-                            <span class="text-red-500">*</span> Staff ID number
-                        </label>
-                        <div class="mt-1">
-                            <input
-                                id="staffId"
-                                v-model="userData.staffId"
-                                type="text"
-                                placeholder="STF-KLA02-"
-                                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                                required
-                            >
-                        </div>
-                    </div>
-
-                    <!-- City, District & Contact -->
-                    <div class="sm:col-span-2">
-                        <label for="city" class="block text-sm font-medium text-gray-700">City</label>
-                        <div class="mt-1">
-                            <input
-                                id="city"
-                                v-model="userData.city"
-                                type="text"
-                                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                            >
-                        </div>
-                    </div>
-
-                    <div class="sm:col-span-2">
-                        <label for="district" class="block text-sm font-medium text-gray-700">District</label>
-                        <div class="mt-1">
-                            <input
-                                id="district"
-                                v-model="userData.district"
-                                type="text"
-                                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                            >
-                        </div>
-                    </div>
-
-                    <div class="sm:col-span-2">
-                        <label for="contact" class="block text-sm font-medium text-gray-700">
-                            <span class="text-red-500">*</span> Contact
-                        </label>
-                        <div class="mt-1">
-                            <input
-                                id="contact"
-                                v-model="userData.contact"
-                                type="text"
-                                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                                required
-                            >
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Form Actions -->
-                <div class="flex items-center justify-between pt-4 border-t border-gray-200">
-                    <button
-                        class="text-sm font-medium text-indigo-600 hover:text-indigo-500"
-                        type="button"
-                        @click="navigateToLogin"
-                    >
-                        Already have an account? Login
-                    </button>
-                    <button
-                        class="group relative w-1/3 flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                        type="submit"
-                        :disabled="loading"
-                    >
-                        <span v-if="loading" class="absolute left-0 inset-y-0 flex items-center pl-3">
-                            <svg class="animate-spin h-5 w-5 text-indigo-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                            </svg>
-                        </span>
-                        {{ loading ? 'Signing up...' : 'Sign up' }}
-                    </button>
-                </div>
-            </form>
+  <div class="signup-container">
+    <!-- Branding Side -->
+    <div class="branding-side">
+      <div class="branding-content">
+        <div class="logo-container">
+          <div class="app-logo">
+            <span>L</span>
+          </div>
         </div>
+        <h1 class="app-name">LOOPA</h1>
+        <p class="app-tagline">Secure crime reporting and evidence management platform</p>
+        <div class="features">
+          <div class="feature-item">
+            <i class="bi bi-shield-check"></i>
+            <span>Secure reporting</span>
+          </div>
+          <div class="feature-item">
+            <i class="bi bi-file-earmark-text"></i>
+            <span>Evidence management</span>
+          </div>
+          <div class="feature-item">
+            <i class="bi bi-graph-up"></i>
+            <span>Real-time analytics</span>
+          </div>
+        </div>
+      </div>
+      <div class="overlay"></div>
     </div>
+
+    
+    <div class="form-side">
+      <div class="form-container">
+        <h2 class="welcome-text">Create your account</h2>
+        <p class="login-subtitle">Please fill in your information to get started</p>
+
+        <div v-if="error" class="error-message">
+          <i class="bi bi-exclamation-triangle"></i>
+          {{ error }}
+        </div>
+
+        <form @submit.prevent="handleSignup" class="signup-form">
+          <div class="form-group-row">
+            <div class="form-group">
+              <label for="first-name">First name</label>
+              <input
+                id="first-name"
+                v-model="userData.firstName"
+                type="text"
+                class="form-control"
+                required
+              >
+            </div>
+            <div class="form-group">
+              <label for="last-name">Last name</label>
+              <input
+                id="last-name"
+                v-model="userData.lastName"
+                type="text"
+                class="form-control"
+                required
+              >
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email address</label>
+            <input
+              id="email"
+              v-model="userData.email"
+              type="email"
+              class="form-control"
+              autocomplete="email"
+              required
+            >
+          </div>
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input
+              id="password"
+              v-model="userData.password"
+              type="password"
+              class="form-control"
+              required
+            >
+          </div>
+          <div class="form-group-row">
+            <div class="form-group">
+              <label for="citizenship">Citizenship <span class="text-danger">*</span></label>
+              <select
+                id="citizenship"
+                v-model="userData.citizenship"
+                class="form-select"
+                required
+              >
+                <option>Ugandan Citizen</option>
+                <option>Not a Ugandan citizen</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="nationalId">National ID number <span class="text-danger">*</span></label>
+              <input
+                id="nationalId"
+                v-model="userData.nationalId"
+                type="text"
+                placeholder="CM90388321NZGA"
+                class="form-control"
+                required
+              >
+            </div>
+          </div>
+          <div v-if="userData.role === 'Security Personnel'" class="form-group">
+            <label for="staffId">Staff ID number <span class="text-danger">*</span></label>
+            <input
+              id="staffId"
+              v-model="userData.staffId"
+              type="text"
+              placeholder="STF-KLA02-"
+              class="form-control"
+              required
+            >
+          </div>
+          <div class="form-group-row">
+            <div class="form-group">
+              <label for="city">City</label>
+              <input
+                id="city"
+                v-model="userData.city"
+                type="text"
+                class="form-control"
+              >
+            </div>
+            <div class="form-group">
+              <label for="district">District</label>
+              <input
+                id="district"
+                v-model="userData.district"
+                type="text"
+                class="form-control"
+              >
+            </div>
+            <div class="form-group">
+              <label for="contact">Contact <span class="text-danger">*</span></label>
+              <input
+                id="contact"
+                v-model="userData.contact"
+                type="text"
+                class="form-control"
+                required
+              >
+            </div>
+          </div>
+          <button
+            class="signup-button"
+            type="submit"
+            :disabled="loading"
+          >
+            <span v-if="loading">
+              <i class="bi bi-arrow-repeat spin"></i> Signing up...
+            </span>
+            <span v-else>Sign up</span>
+          </button>
+        </form>
+
+        <div class="register-prompt">
+          Already have an account?
+          <NuxtLink to="/login" class="register-link">Login</NuxtLink>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { useAuth } from '~/composables/useAuth'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
-const loading = ref(false)
-const error = ref(null)
+const { register, loading, error, clearError } = useAuth()
 
 const userData = reactive({
-    firstName: '',
-    lastName: '',
-    email: '',
-    password: '',
-    citizenship: 'Ugandan Citizen',
-    role: 'Civilian',
-    nationalId: '',
-    staffId: '',
-    city: '',
-    district: '',
-    contact: ''
+  firstName: '',
+  lastName: '',
+  email: '',
+  password: '',
+  citizenship: 'Ugandan Citizen',
+  role: 'User',
+  nationalId: '',
+  staffId: '',
+  city: '',
+  district: '',
+  contact: ''
 })
 
 const handleSignup = async () => {
-    loading.value = true
-    error.value = null
-    
-    try {
-        // Make sure staffId is required for Security Personnel
-        if (userData.role === 'Security Personnel' && !userData.staffId) {
-            throw new Error('Staff ID is required for Security Personnel')
-        }
-        
-        // Call the register API endpoint
-        await $fetch('/api/auth/register', {
-            method: 'POST',
-            body: userData
-        })
-        
-        // Show success message
-        alert('Registration successful! Please log in with your credentials.')
-        
-        // Redirect to login page
-        router.push('/login')
-    } catch (err) {
-        console.error('Registration error:', err)
-        error.value = err.data?.message || err.message || 'Failed to register. Please try again.'
-    } finally {
-        loading.value = false
+  clearError()
+  try {
+    if (userData.role === 'Security Personnel' && !userData.staffId) {
+      throw new Error('Staff ID is required for Security Personnel')
     }
-}
-
-const navigateToLogin = () => {
+    await register(userData)
+    alert('Registration successful! Please log in with your credentials.')
     router.push('/login')
+  } catch (err) {
+    console.error('Registration error:', err)
+  }
 }
 </script>
+
+<style scoped>
+.signup-container {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+}
+
+/* Branding side */
+.branding-side {
+  display: none;
+  position: relative;
+  background-image: linear-gradient(135deg, #3a4dff, #2079ff);
+  color: white;
+  overflow: hidden;
+}
+
+@media (min-width: 768px) {
+  .branding-side {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+  }
+  .form-side {
+    flex: 1;
+  }
+}
+
+.branding-content {
+  z-index: 2;
+  padding: 2rem;
+  text-align: center;
+  max-width: 80%;
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2MDAiIGhlaWdodD0iNjAwIiB2aWV3Qm94PSIwIDAgNjAwIDYwMCI+PHBhdGggZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZmZmIiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLW9wYWNpdHk9IjAuMTUiIGQ9Ik0wLDBoNjAwdjYwMEgwVjB6IE02MCw2MGg0ODB2NDgwSDYwVjYweiBNMTIwLDEyMGgzNjB2MzYwSDEyMFYxMjB6IE0xODAsMTgwaDI0MHYyNDBIMTgwVjE4MHogTTI0MCwyNDBoMTIwdjEyMEgyNDBWMjQweiIvPjwvc3ZnPg==');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  opacity: 0.1;
+  z-index: 1;
+}
+
+.logo-container {
+  margin-bottom: 1.5rem;
+}
+
+.app-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 70px;
+  height: 70px;
+  background-color: white;
+  border-radius: 50%;
+  margin-bottom: 0.5rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+}
+
+.app-logo span {
+  font-size: 36px;
+  font-weight: bold;
+  color: #3a4dff;
+}
+
+.app-name {
+  font-size: 3rem;
+  font-weight: 800;
+  letter-spacing: 2px;
+  margin-bottom: 1rem;
+}
+
+.app-tagline {
+  font-size: 1.1rem;
+  opacity: 0.9;
+  margin-bottom: 2rem;
+  line-height: 1.6;
+}
+
+.features {
+  margin-top: 3rem;
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+}
+
+.feature-item i {
+  margin-right: 1rem;
+  font-size: 1.5rem;
+}
+
+/* Form side */
+.form-side {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background-color: #f8f9fa;
+}
+
+.form-container {
+  width: 100%;
+  max-width: 500px;
+  padding: 2rem;
+}
+
+.welcome-text {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.login-subtitle {
+  color: #6c757d;
+  margin-bottom: 2.5rem;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group-row {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.form-group-row .form-group {
+  flex: 1;
+}
+
+label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #495057;
+}
+
+.form-control,
+.form-select {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #dee2e6;
+  border-radius: 0.375rem;
+  font-size: 1rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-control:focus,
+.form-select:focus {
+  outline: none;
+  border-color: #3a4dff;
+  box-shadow: 0 0 0 0.2rem rgba(58, 77, 255, 0.15);
+}
+
+.signup-button {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background-color: #3a4dff;
+  color: white;
+  border: none;
+  border-radius: 0.375rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 1.5rem;
+}
+
+.signup-button:hover {
+  background-color: #2a3bed;
+}
+
+.signup-button:disabled {
+  background-color: #6c7ae0;
+  cursor: not-allowed;
+}
+
+.error-message {
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  background-color: #fff5f5;
+  color: #e03131;
+  border-radius: 0.375rem;
+  border-left: 4px solid #e03131;
+  display: flex;
+  align-items: center;
+}
+
+.error-message i {
+  margin-right: 0.5rem;
+}
+
+.register-prompt {
+  margin-top: 2.5rem;
+  text-align: center;
+  color: #6c757d;
+}
+
+.register-link {
+  color: #3a4dff;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.register-link:hover {
+  text-decoration: underline;
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+</style>
