@@ -107,11 +107,15 @@ export default defineEventHandler(async (event) => {
       token = authHeader.substring(7)
     }
   }
+  
+  // If no token is found, just return without error
   if (!token) return
+  
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET)
     event.context.auth = decoded
   } catch (err) {
+    // Only throw error if token exists but is invalid
     throw createError({ statusCode: 401, message: 'Invalid token' })
   }
 })
