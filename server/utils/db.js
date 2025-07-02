@@ -1,23 +1,27 @@
-import mongoose from 'mongoose'
-import { useRuntimeConfig } from '#imports'
+import mongoose from 'mongoose';
 
-let connection = null
+const MONGODB_URI = process.env.MONGODB_URI;
 
-export async function connectToDatabase() {
-  if (connection) return connection
-  
-  const config = useRuntimeConfig()
-  
-  try {
-    connection = await mongoose.connect(config.mongodbUri)
-    
-    console.log('Connected to MongoDB')
-    return connection
-  } catch (error) {
-    console.error('MongoDB connection error:', error)
-    throw error
-  }
+if (!MONGODB_URI) {
+  throw new Error('Please define the MONGODB_URI environment variable');
 }
 
-// Auto-connect when the server starts
-connectToDatabase().catch(console.error)
+let cached = global.mongoose;
+
+if (!cached) {
+  cached = global.mongoose = { conn: null, promise: null };
+}
+
+export async function connectToDatabase() {
+  if (cached.conn) {
+    return cached.conn;
+  }
+  if (!cached.promise) {
+    cached.promise = mongoose.connect(MONGODB_URI, {
+      bufferCommands: false,
+      serverSelectionTimeoutMS: 10000,
+    }).then((mongoose) => mongoose);
+  }
+  cached.conn = await cached.promise;
+  return cached.conn;
+}

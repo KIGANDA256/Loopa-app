@@ -25,6 +25,7 @@
     "eslint": "^9.26.0",
     "formidable": "^3.5.4",
     "jsonwebtoken": "^9.0.2",
+    "mongodb": "^4.17.1",
     "mongoose": "^8.16.0",
     "nuxt": "^3.17.2",
     "primeicons": "^7.0.0",
